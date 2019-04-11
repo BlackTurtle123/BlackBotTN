@@ -66,6 +66,7 @@ def get_last_price():
     return last_trade_price
 
 
+
 CMD = ""
 CFG_FILE = ""
 
