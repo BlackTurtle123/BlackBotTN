@@ -36,9 +36,10 @@ def grid_price(level):
 def place_order(order_type, level):
     if 0 <= level < GRID_LEVELS and (grid[level] == "" or grid[level] == "-"):
         price = grid_price(level)
-        price = int(price / 100) * 100
-        price = round(price / 10 ** (PAIR2.asset2.decimals + (PAIR2.asset2.decimals - PAIR2.asset1.decimals)), 8)
-        price = float(str(price))
+       # price = int(price / 100) * 100
+       # price = round(price / 10 ** (PAIR2.asset2.decimals + (PAIR2.asset2.decimals - PAIR2.asset1.decimals)), 8)
+       # price = float(str(price))
+        print("Calc order price "+order_type+" :" +str(price))
         try:
             balance_amount, balance_price = BLACKBOT.tradableBalance(PAIR)
             tranche_size = int(TRANCHE_SIZE * (1 - (FLEXIBILITY / float(200)) + (random.random() * FLEXIBILITY / float(100))))
@@ -56,9 +57,11 @@ def place_order(order_type, level):
 
 def get_last_price():
     try:
-        #last_trade_price = int(round(float(PAIR.trades(1)[0]['price']) * 10 ** PAIR.asset2.decimals))
-        last_trade_price = int(round(float(PAIR.trades(1)[0]['price'] * 10 ** (PAIR2.asset2.decimals + (PAIR2.asset2.decimals - PAIR2.asset1.decimals)))))
-    except:
+        last_trade_price = int(round(float(float(PAIR.trades(1)[0]['price']) * 10 ** (PAIR2.asset2.decimals + (PAIR2.asset2.decimals - PAIR2.asset1.decimals)))))
+        print(str(last_trade_price))
+    except Exception as e:
+        print("Exception ")
+        print(str(e))
         last_trade_price = 0
     return last_trade_price
 
@@ -154,6 +157,7 @@ try:
         basePrice = PAIR.orderbook()['bids'][0]['price']
     elif GRID_BASE == "ASK":
         basePrice = PAIR.orderbook()['asks'][0]['price']
+    log("GRID_BASE: "+str(basePrice))
 except:
     basePrice = 0
 if basePrice == 0:
