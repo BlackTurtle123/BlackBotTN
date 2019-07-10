@@ -179,46 +179,49 @@ if GRID_TYPE == "SYMMETRIC" or GRID_TYPE == "ASKS":
 
 # loop forever
 while True:
-    # attempt to retrieve order history from matcher
     try:
-        history = BLACKBOT.getOrderHistory(PAIR)
-    except:
-        history = []
+        # attempt to retrieve order history from matcher
+        try:
+            history = BLACKBOT.getOrderHistory(PAIR)
+        except:
+            history = []
 
-    if history:
-        # loop through all grid levels
-        # first all ask levels from the lowest ask to the highest -> range(grid.index("") + 1, len(grid))
-        # then all bid levels from the highest to the lowest -> range(grid.index("") - 1, -1, -1)
-        for n in list(range(last_level + 1, len(grid))) + list(range(last_level - 1, -1, -1)):
+        if history:
+            # loop through all grid levels
+            # first all ask levels from the lowest ask to the highest -> range(grid.index("") + 1, len(grid))
+            # then all bid levels from the highest to the lowest -> range(grid.index("") - 1, -1, -1)
+            for n in list(range(last_level + 1, len(grid))) + list(range(last_level - 1, -1, -1)):
 
-            # find the order with id == grid[n] in the history list
+                # find the order with id == grid[n] in the history list
 
-            order = [item for item in history if item['id'] == grid[n]]
-            status = order[0].get("status") if order else ""
-            if status == "Filled":
-                BLACKBOT.deleteOrderHistory(PAIR)
-                last_price = get_last_price()
-                grid[n] = ""
-                last_level = n
-                filled_price = order[0].get("price")
-                filled_type = order[0].get("type")
-                log("## [%03d] %s%-4s Filled %18.*f%s" % (n, COLOR_BLUE, filled_type.upper(), PAIR.asset2.decimals, float(filled_price) / 10 ** (PAIR.asset2.decimals + (PAIR.asset2.decimals - PAIR.asset1.decimals)), COLOR_RESET))
+                order = [item for item in history if item['id'] == grid[n]]
+                status = order[0].get("status") if order else ""
+                if status == "Filled":
+                    BLACKBOT.deleteOrderHistory(PAIR)
+                    last_price = get_last_price()
+                    grid[n] = ""
+                    last_level = n
+                    filled_price = order[0].get("price")
+                    filled_type = order[0].get("type")
+                    log("## [%03d] %s%-4s Filled %18.*f%s" % (n, COLOR_BLUE, filled_type.upper(), PAIR.asset2.decimals, float(filled_price) / 10 ** (PAIR.asset2.decimals + (PAIR.asset2.decimals - PAIR.asset1.decimals)), COLOR_RESET))
 
-                if filled_type == "buy":
-                    if filled_price >= last_price:
-                        place_order("sell", n + 1)
-                    else:
-                        place_order("buy", n)
-                elif filled_type == "sell":
-                    if filled_price <= last_price:
-                        place_order("buy", n - 1)
-                    else:
+                    if filled_type == "buy":
+                        if filled_price >= last_price:
+                            place_order("sell", n + 1)
+                        else:
+                            place_order("buy", n)
+                    elif filled_type == "sell":
+                        if filled_price <= last_price:
+                            place_order("buy", n - 1)
+                        else:
+                            place_order("sell", n)
+                # attempt to place again orders for empty grid levels or cancelled orders
+                elif (status == "" or status == "Cancelled") and grid[n] != "-":
+                    grid[n] = ""
+                    if n > last_level:
                         place_order("sell", n)
-            # attempt to place again orders for empty grid levels or cancelled orders
-            elif (status == "" or status == "Cancelled") and grid[n] != "-":
-                grid[n] = ""
-                if n > last_level:
-                    place_order("sell", n)
-                elif n < last_level:
-                    place_order("buy", n)
-    time.sleep(5)
+                    elif n < last_level:
+                        place_order("buy", n)
+        time.sleep(5)
+    except Exception as e:
+        print('Exception has happened ' + str(e))
