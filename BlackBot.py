@@ -56,11 +56,8 @@ def place_order(order_type, level):
 
 def get_last_price():
     try:
-        last_trade_price = int(round(float(float(PAIR.trades(1)[0]['price']) * 10 ** (PAIR2.asset2.decimals + (PAIR2.asset2.decimals - PAIR2.asset1.decimals)))))
-        print(str(last_trade_price))
-    except Exception as e:
-        print("Exception ")
-        print(str(e))
+        last_trade_price = int(float(PAIR.trades(1)[0]['price']) * 10 ** (PAIR2.asset2.decimals + (PAIR2.asset2.decimals - PAIR2.asset1.decimals)))
+    except:
         last_trade_price = 0
     return last_trade_price
 
@@ -104,6 +101,15 @@ try:
     GRID_TYPE = config.get('grid', 'type').upper()
 
     LOGFILE = config.get('logging', 'logfile')
+
+    BLACKBOT = pw.Address(privateKey=PRIVATE_KEY)
+
+    log("-" * 80)
+    log("          Address : %s" % BLACKBOT.address)
+    log("  Amount Asset ID : %s" % amountAssetID)
+    log("   Price Asset ID : %s" % priceAssetID)
+    log("-" * 80)
+    log("")
 except:
     log("Error reading config file")
     log("Exiting.")
@@ -119,13 +125,6 @@ if priceAssetID == 'TN':
     PAIR2 = pw.AssetPair(pw.Asset(amountAssetID), pw.Asset('WAVES'))
 if amountAssetID == 'TN':
     PAIR2 = pw.AssetPair(pw.Asset('WAVES'), pw.Asset(priceAssetID))
-
-log("-" * 80)
-log("          Address : %s" % BLACKBOT.address)
-log("  Amount Asset ID : %s" % amountAssetID)
-log("   Price Asset ID : %s" % priceAssetID)
-log("-" * 80)
-log("")
 
 # grid list with GRID_LEVELS items. item n is the ID of the order placed at the price calculated with this formula
 # price = int(basePrice * (1 + INTERVAL) ** (n - GRID_LEVELS / 2))
