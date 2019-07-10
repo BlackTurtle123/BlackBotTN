@@ -39,7 +39,6 @@ def place_order(order_type, level):
        # price = int(price / 100) * 100
        # price = round(price / 10 ** (PAIR2.asset2.decimals + (PAIR2.asset2.decimals - PAIR2.asset1.decimals)), 8)
        # price = float(str(price))
-        print("Calc order price "+order_type+" :" +str(price))
         try:
             balance_amount, balance_price = BLACKBOT.tradableBalance(PAIR)
             tranche_size = int(TRANCHE_SIZE * (1 - (FLEXIBILITY / float(200)) + (random.random() * FLEXIBILITY / float(100))))
