@@ -36,9 +36,9 @@ def grid_price(level):
 def place_order(order_type, level):
     if 0 <= level < GRID_LEVELS and (grid[level] == "" or grid[level] == "-"):
         price = grid_price(level)
-       # price = int(price / 100) * 100
-       # price = round(price / 10 ** (PAIR2.asset2.decimals + (PAIR2.asset2.decimals - PAIR2.asset1.decimals)), 8)
-       # price = float(str(price))
+        #price = int(price / 100) * 100
+        price = round(price / 10 ** (PAIR2.asset2.decimals + (PAIR2.asset2.decimals - PAIR2.asset1.decimals)), 8)
+        price = float(str(price))
         try:
             balance_amount, balance_price = BLACKBOT.tradableBalance(PAIR)
             tranche_size = int(TRANCHE_SIZE * (1 - (FLEXIBILITY / float(200)) + (random.random() * FLEXIBILITY / float(100))))
@@ -101,6 +101,10 @@ try:
     GRID_TYPE = config.get('grid', 'type').upper()
 
     LOGFILE = config.get('logging', 'logfile')
+    pw.setNode(NODE, NETWORK,'L')
+    pw.setMatcher(MATCHER)
+    pw.setDatafeed('https://bot.blackturtle.eu')
+    pw.DEFAULT_CURRENCY = 'TN'
 
     BLACKBOT = pw.Address(privateKey=PRIVATE_KEY)
 
@@ -115,16 +119,9 @@ except:
     log("Exiting.")
     exit(1)
 
-pw.setNode(NODE, NETWORK,'L')
-pw.setMatcher(MATCHER)
-pw.setDatafeed('https://bot.blackturtle.eu')
 BLACKBOT = pw.Address(privateKey=PRIVATE_KEY)
 PAIR = pw.AssetPair(pw.Asset(amountAssetID), pw.Asset(priceAssetID))
 PAIR2 = PAIR
-if priceAssetID == 'TN':
-    PAIR2 = pw.AssetPair(pw.Asset(amountAssetID), pw.Asset('WAVES'))
-if amountAssetID == 'TN':
-    PAIR2 = pw.AssetPair(pw.Asset('WAVES'), pw.Asset(priceAssetID))
 
 # grid list with GRID_LEVELS items. item n is the ID of the order placed at the price calculated with this formula
 # price = int(basePrice * (1 + INTERVAL) ** (n - GRID_LEVELS / 2))
